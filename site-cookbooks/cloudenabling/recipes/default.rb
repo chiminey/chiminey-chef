@@ -1,69 +1,79 @@
 #
-# Cookbook Name:: mytardis
+# Cookbook Name:: cloudenabling
 # Recipe:: default
-#
-# Copyright (c) 2012, The University of Queensland
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#     * Redistributions of source code must retain the above copyright
-#       notice, this list of conditions and the following disclaimer.
-#     * Redistributions in binary form must reproduce the above copyright
-#       notice, this list of conditions and the following disclaimer in the
-#       documentation and/or other materials provided with the distribution.
-#     * Neither the name of the The University of Queensland nor the
-#       names of its contributors may be used to endorse or promote products
-#       derived from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED. IN NO EVENT SHALL THE UNIVERSITY OF QUEENSLAND BE LIABLE FOR
-# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Copyright (C) 2012, RMIT University
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+
+import os
 
 
 include_recipe "git"
-include_recipe "mytardis::build-essential"
-include_recipe "mytardis::deps"
-include_recipe "mytardis::nginx"
+include_recipe "cloudenabling::build-essential"
+include_recipe "cloudenabling::deps"
+include_recipe "cloudenabling::nginx"
+
+
+
+# Sadly, only works for centos 6.x for the moment
 
 app_dirs = [
-  "/opt/mytardis",
-  "/opt/mytardis/shared",
-  "/opt/mytardis/shared/apps",
-  "/var/lib/mytardis",
-  "/var/log/mytardis"
+  "/opt/cloudenabling",
+  "/opt/cloudenabling/shared",
+  "/var/lib/cloudenabling",
+  "/var/log/cloudenabling"
 ]
 
 app_links = {
-  "/opt/mytardis/shared/data" => "/var/lib/mytardis",
-  "/opt/mytardis/shared/log" => "/var/log/mytardis"
+  "/opt/cloudenabling/shared/data" => "/var/lib/cloudenabling",
+  "/opt/cloudenabling/shared/log" => "/var/log/cloudenabling"
 }
 
-
-cookbook_file "/opt/mytardis/shared/settings.py" do
-  action :create_if_missing
-  source "settings.py"
-  owner "mytardis"
-  group "mytardis"
+app_dirs.each do |dir|
+  directory dir do
+    owner "root"
+    group "root"
+  end
 end
 
-bash "install foreman" do
-  code <<-EOH
-  # Version 0.48 removes 'log_root' variable
-  gem install foreman -v 0.47.0
-  EOH
-  #this fails on NeCTAR Ubuntu Lucid..
-  only_if do
-    output = `gem list --local | grep foreman`
-    output.length == 0
+app_links.each do |k, v|
+  link k do
+    to v
+    owner "root"
+    group "root"
   end
+end
+
+
+cookbook_file "/opt/cloudenabling/shared/settings.py" do
+  action :create_if_missing
+  source "settings.py"
+  owner "root"
+  group "root"
+end
+
+cookbook_file "/opt/cloudenabling/shared/buildout.cfg" do
+  action :create
+  source "buildout.cfg"
+  owner "root"
+  group "root"
 end
 
 cookbook_file "/etc/init/uwsgi.conf" do
@@ -73,44 +83,12 @@ cookbook_file "/etc/init/uwsgi.conf" do
   group "root"
 end
 
+app_symlinks = {}
 
-deploy_revision "cloudenabling" do
-  action :deploy
-  deploy_to "/opt/cloudenabling"
-  repository node['cloudenabling']['repo']
-  branch node['cloudenabling']['branch']
-  user "root"
-  group "riit"
+# if you delete /opt/cloudenabling to regenerate, don't forget to remove
+# /var/chef-solo/cache/deploy-revisions/cloudenabling otherwise the respo clone wont work.
 
-  bash "cloudenabling_buildout_install" do
-    user "root"
-    cwd current_release
-    code <<-EOH
-      # this egg-cache directory never gets created - hopfully not a problem.
-      export PYTHON_EGG_CACHE=/opt/mytardis/shared/egg-cache
-      python setup.py clean
-      find . -name '*.py[co]' -delete
-      python bootstrap.py
-      bin/buildout -c buildout-prod.cfg install
-      bin/django syncdb --noinput --migrate
-      bin/django collectstatic -l --noinput
-    EOH
-  end
-  end
-  restart_command do
-    current_release = release_path
-
-    bash "mytardis_foreman_install_and_restart" do
-      cwd "/opt/mytardis/current"
-      code <<-EOH
-        foreman export upstart /etc/init -a mytardis -p 3031 -u mytardis -l /var/log/mytardis -t ./foreman
-        restart mytardis || start mytardis
-      EOH
-    end
-  end
-end
-
-
+# To access private repos, generate ssh key for root and upload to bitbucket
 deploy_revision "cloudenabling" do
   action :deploy
   deploy_to "/opt/cloudenabling"
@@ -119,10 +97,9 @@ deploy_revision "cloudenabling" do
   user "root"
   group "root"
   symlink_before_migrate(app_symlinks.merge({
-      "data" => "var",
       "log" => "log",
       "buildout.cfg" => "buildout-prod.cfg",
-      "settings.py" => "tardis/settings.py"
+      "settings.py" => "bdphpcprovider/settings.py"
   }))
   purge_before_symlink([])
   create_dirs_before_symlink([])
@@ -150,7 +127,8 @@ deploy_revision "cloudenabling" do
     bash "mytardis_foreman_install_and_restart" do
       cwd "/opt/cloudenabling/current"
       code <<-EOH
-        restart uwsgi
+        stop uwsgi
+        start uwsgi
       EOH
     end
   end
