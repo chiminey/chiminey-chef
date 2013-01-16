@@ -6,8 +6,14 @@ if platform?("redhat","centos","fedora")
     action :install
   end
   # The basics for Python & devel packages we need for buildout
-  mytardis_pkg_deps = [
+  cloudenabling_pkg_deps = [
     "gcc",
     "python-devel"
   ]
+end
+
+cloudenabling_pkg_deps.each do |pkg|
+  package pkg do
+    action :install
+  end
 end
