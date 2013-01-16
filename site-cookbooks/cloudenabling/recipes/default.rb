@@ -22,7 +22,6 @@
 # IN THE SOFTWARE.
 
 
-import os
 
 
 include_recipe "git"
