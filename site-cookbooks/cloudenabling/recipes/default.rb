@@ -128,6 +128,9 @@ deploy_revision "cloudenabling" do
       code <<-EOH
         stop uwsgi
         start uwsgi
+        service nginx stop
+        service nginx stop
+        service nginx start
       EOH
     end
   end
