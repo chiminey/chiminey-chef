@@ -28,10 +28,22 @@ include_recipe "git"
 include_recipe "cloudenabling::build-essential"
 include_recipe "cloudenabling::deps"
 include_recipe "cloudenabling::nginx"
-
-
+include_recipe "cloudenabling::postgresql"
 
 # Sadly, only works for centos 6.x for the moment
+
+ohai "reload_passwd" do
+   action :nothing
+   plugin "passwd"
+end
+
+user "bdphpc" do
+   action :create
+   comment "BDPHPC"
+   system true
+   supports :manage_home => true
+   notifies :reload, resources(:ohai => "reload_passwd"), :immediately
+end
 
 app_dirs = [
   "/opt/cloudenabling",
@@ -47,16 +59,16 @@ app_links = {
 
 app_dirs.each do |dir|
   directory dir do
-    owner "root"
-    group "root"
+    owner "bdphpc"
+    group "bdphpc"
   end
 end
 
 app_links.each do |k, v|
   link k do
     to v
-    owner "root"
-    group "root"
+    owner "bdphpc"
+    group "bdphpc"
   end
 end
 
@@ -64,22 +76,22 @@ end
 cookbook_file "/opt/cloudenabling/shared/settings.py" do
   action :create_if_missing
   source "settings.py"
-  owner "root"
-  group "root"
+  owner "bdphpc"
+  group "bdphpc"
 end
 
 cookbook_file "/opt/cloudenabling/shared/buildout.cfg" do
   action :create
   source "buildout.cfg"
-  owner "root"
-  group "root"
+  owner "bdphpc"
+  group "bdphpc"
 end
 
 cookbook_file "/etc/init/uwsgi.conf" do
   action :create_if_missing
   source "uwsgi.conf"
-  owner "root"
-  group "root"
+  owner "bdphpc"
+  group "bdphpc"
 end
 
 app_symlinks = {}
@@ -93,7 +105,7 @@ deploy_revision "cloudenabling" do
   deploy_to "/opt/cloudenabling"
   repository node['cloudenabling']['repo']
   branch node['cloudenabling']['branch']
-  user "root"
+  user "root"  # need to use root's ssh keys :(
   group "root"
   symlink_before_migrate(app_symlinks.merge({
       "log" => "log",
@@ -106,17 +118,34 @@ deploy_revision "cloudenabling" do
   before_symlink do
     current_release = release_path
 
+    execute "update owner" do
+      command "chown -R bdphpc.bdphpc $RELEASEDIR"
+      environment ({'RELEASEDIR' => current_release})
+    end
+
+    file "/opt/cloudenabling/shared/settings.py" do 
+      user "bdphpc"
+      group "bdphpc"
+    end
+
+
+    file "/opt/cloudenabling/shared/buildout.cfg" do 
+      user "bdphpc"
+      group "bdphpc"
+    end
+
     bash "cloudenabling_buildout_install" do
-      user "root"
+      user "bdphpc"
       cwd current_release
       code <<-EOH
         # this egg-cache directory never gets created - hopfully not a problem.
         export PYTHON_EGG_CACHE=/opt/cloudenabling/shared/egg-cache
         python setup.py clean
         find . -name '*.py[co]' -delete
-        python bootstrap.py
+        python bootstrap.py -v 1.7.0
         bin/buildout -c buildout-prod.cfg install
         bin/django syncdb --noinput --migrate
+        bin/django collectstatic -l --noinput 
       EOH
     end
   end
