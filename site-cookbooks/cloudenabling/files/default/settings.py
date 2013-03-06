@@ -11,3 +11,30 @@ DATABASES = {
         'PORT': '',
     }
 }
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'timestamped': {
+            'format': '%(asctime)s-%(filename)s-%(lineno)s-%(levelname)s: %(message)s'
+        },
+    },
+
+    'handlers': {
+        'file': {
+            'level':'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/cloudenabling/bdphpcprovider.log',
+            'formatter': 'timestamped'
+        },
+    },
+
+    'loggers': {
+        'bdphpcprovider.smartconnectorscheduler': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            },
+        },
+}
+
