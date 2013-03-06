@@ -49,7 +49,10 @@ app_dirs = [
   "/opt/cloudenabling",
   "/opt/cloudenabling/shared",
   "/var/lib/cloudenabling",
-  "/var/log/cloudenabling"
+  "/var/log/cloudenabling",
+  "/var/log/cloudenabling/celery",
+  "/var/run/cloudenabling",
+  "/var/run/cloudenabling/celery"
 ]
 
 app_links = {
@@ -87,6 +90,40 @@ cookbook_file "/opt/cloudenabling/shared/buildout.cfg" do
   group "bdphpc"
 end
 
+cookbook_file "/etc/init.d/celeryd" do
+  action :create_if_missing
+  source "celeryd"
+  mode 0755
+  owner "root"
+  group "root"
+end
+
+
+cookbook_file "/etc/default/celeryd" do
+  action :create_if_missing
+  source "celeryd.conf"
+  mode 0755
+  owner "root"
+  group "root"
+end
+
+cookbook_file "/etc/init.d/celerybeat" do
+  action :create_if_missing
+  source "celerybeat"
+  mode 0755
+  owner "root"
+  group "root"
+end
+
+cookbook_file "/etc/default/celerybeat" do
+  action :create_if_missing
+  source "celerybeat.conf"
+  mode 0755
+  owner "root"
+  group "root"
+end
+
+
 cookbook_file "/etc/init/uwsgi.conf" do
   action :create_if_missing
   source "uwsgi.conf"
@@ -123,13 +160,13 @@ deploy_revision "cloudenabling" do
       environment ({'RELEASEDIR' => current_release})
     end
 
-    file "/opt/cloudenabling/shared/settings.py" do 
+    file "/opt/cloudenabling/shared/settings.py" do
       user "bdphpc"
       group "bdphpc"
     end
 
 
-    file "/opt/cloudenabling/shared/buildout.cfg" do 
+    file "/opt/cloudenabling/shared/buildout.cfg" do
       user "bdphpc"
       group "bdphpc"
     end
@@ -145,7 +182,7 @@ deploy_revision "cloudenabling" do
         python bootstrap.py -v 1.7.0
         bin/buildout -c buildout-prod.cfg install
         bin/django syncdb --noinput --migrate
-        bin/django collectstatic -l --noinput 
+        bin/django collectstatic -l --noinput
       EOH
     end
   end
@@ -160,6 +197,11 @@ deploy_revision "cloudenabling" do
         service nginx stop
         service nginx stop
         service nginx start
+        service celeryd stop
+        service celeryd start
+        service celerybeat stop
+        service celerybeat start
+
       EOH
     end
   end
