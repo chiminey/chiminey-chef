@@ -28,7 +28,7 @@ include_recipe "git"
 include_recipe "cloudenabling::build-essential"
 include_recipe "cloudenabling::deps"
 include_recipe "cloudenabling::nginx"
-include_recipe "cloudenabling::postgresql"
+#include_recipe "cloudenabling::postgresql"
 
 # Sadly, only works for centos 6.x for the moment
 
