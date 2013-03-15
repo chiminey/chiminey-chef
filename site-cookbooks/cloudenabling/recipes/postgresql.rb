@@ -1,4 +1,3 @@
-
 include_recipe "postgresql::server"
 
 # Probably don't need this, given we have IDENT security

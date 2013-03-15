@@ -28,7 +28,7 @@ include_recipe "git"
 include_recipe "cloudenabling::build-essential"
 include_recipe "cloudenabling::deps"
 include_recipe "cloudenabling::nginx"
-#include_recipe "cloudenabling::postgresql"
+include_recipe "cloudenabling::postgresql"
 
 # Sadly, only works for centos 6.x for the moment
 
@@ -90,16 +90,8 @@ cookbook_file "/opt/cloudenabling/shared/buildout.cfg" do
   group "bdphpc"
 end
 
-cookbook_file "/etc/init.d/celeryd" do
-  action :create_if_missing
-  source "celeryd"
-  mode 0755
-  owner "root"
-  group "root"
-end
 
-
-cookbook_file "/etc/default/celeryd" do
+cookbook_file "/etc/init/celeryd.conf" do
   action :create_if_missing
   source "celeryd.conf"
   mode 0755
@@ -107,15 +99,7 @@ cookbook_file "/etc/default/celeryd" do
   group "root"
 end
 
-cookbook_file "/etc/init.d/celerybeat" do
-  action :create_if_missing
-  source "celerybeat"
-  mode 0755
-  owner "root"
-  group "root"
-end
-
-cookbook_file "/etc/default/celerybeat" do
+cookbook_file "/etc/init/celerybeat.conf" do
   action :create_if_missing
   source "celerybeat.conf"
   mode 0755
@@ -185,6 +169,13 @@ deploy_revision "cloudenabling" do
         bin/django collectstatic -l --noinput
       EOH
     end
+    cookbook_file "/opt/cloudenabling/current/bin/uwsgi" do
+       action :create
+       mode 0755
+       source "uwsgi-old"
+       owner "bdphpc"
+       group "bdphpc"
+    end
   end
   restart_command do
     current_release = release_path
@@ -197,10 +188,10 @@ deploy_revision "cloudenabling" do
         service nginx stop
         service nginx stop
         service nginx start
-        service celeryd stop
-        service celeryd start
-        service celerybeat stop
-        service celerybeat start
+        stop celeryd 
+        start celeryd
+        stop celerybeat 
+        start celerybeat 
 
       EOH
     end
