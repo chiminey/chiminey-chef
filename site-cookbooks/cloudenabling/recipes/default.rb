@@ -41,6 +41,7 @@ user "bdphpc" do
    action :create
    comment "BDPHPC"
    system true
+   home "/home/bdphpc"
    supports :manage_home => true
    notifies :reload, resources(:ohai => "reload_passwd"), :immediately
 end
@@ -126,8 +127,8 @@ deploy_revision "cloudenabling" do
   deploy_to "/opt/cloudenabling"
   repository node['cloudenabling']['repo']
   branch node['cloudenabling']['branch']
-  user "root"  # need to use root's ssh keys :(
-  group "root"
+  user "bdphpc" 
+  group "bdphpc"
   symlink_before_migrate(app_symlinks.merge({
       "log" => "log",
       "buildout.cfg" => "buildout-prod.cfg",
@@ -169,6 +170,8 @@ deploy_revision "cloudenabling" do
         bin/django collectstatic -l --noinput
       EOH
     end
+  end
+  before_restart do
     cookbook_file "/opt/cloudenabling/current/bin/uwsgi" do
        action :create
        mode 0755
@@ -177,6 +180,7 @@ deploy_revision "cloudenabling" do
        group "bdphpc"
     end
   end
+
   restart_command do
     current_release = release_path
 
