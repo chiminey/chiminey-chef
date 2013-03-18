@@ -76,6 +76,14 @@ app_links.each do |k, v|
   end
 end
 
+# setuptools needs to unzip some eggs so needs access this directory
+directory "/home/bdphpc/.python-eggs"
+  owner "bdphpc"
+  group "bdphpc"
+  mode "0770"  
+  action :create
+end
+
 
 cookbook_file "/opt/cloudenabling/shared/settings.py" do
   action :create_if_missing
@@ -121,7 +129,7 @@ app_symlinks = {}
 # if you delete /opt/cloudenabling to regenerate, don't forget to remove
 # /var/chef-solo/cache/deploy-revisions/cloudenabling otherwise the respo clone wont work.
 
-# To access private repos, generate ssh key for root and upload to bitbucket
+# To access private repos, generate ssh key for bdphpc and upload to bitbucket
 deploy_revision "cloudenabling" do
   action :deploy
   deploy_to "/opt/cloudenabling"
@@ -150,7 +158,6 @@ deploy_revision "cloudenabling" do
       group "bdphpc"
     end
 
-
     file "/opt/cloudenabling/shared/buildout.cfg" do
       user "bdphpc"
       group "bdphpc"
@@ -172,6 +179,8 @@ deploy_revision "cloudenabling" do
     end
   end
   before_restart do
+    # latest versions of uwsgi retrieved from buildout do not support xml
+    # so we have to to use earlier version FIXME: use different getting approach
     cookbook_file "/opt/cloudenabling/current/bin/uwsgi" do
        action :create
        mode 0755
