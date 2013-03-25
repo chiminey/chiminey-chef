@@ -77,7 +77,7 @@ app_links.each do |k, v|
 end
 
 # setuptools needs to unzip some eggs so needs access this directory
-directory "/home/bdphpc/.python-eggs"
+directory "/home/bdphpc/.python-eggs" do
   owner "bdphpc"
   group "bdphpc"
   mode "0770"  
