@@ -54,6 +54,7 @@ app_dirs = [
   "/var/log/cloudenabling/celery",
   "/var/run/cloudenabling",
   "/var/run/cloudenabling/celery"
+  "/var/cloudenabling/remotesys"
 ]
 
 app_links = {
