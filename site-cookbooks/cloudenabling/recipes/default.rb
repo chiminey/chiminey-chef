@@ -53,7 +53,8 @@ app_dirs = [
   "/var/log/cloudenabling",
   "/var/log/cloudenabling/celery",
   "/var/run/cloudenabling",
-  "/var/run/cloudenabling/celery"
+  "/var/run/cloudenabling/celery",
+  "/var/cloudenabling",
   "/var/cloudenabling/remotesys"
 ]
 
