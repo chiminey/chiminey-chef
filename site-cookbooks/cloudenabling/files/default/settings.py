@@ -1,6 +1,8 @@
 #Generated from Chef, do not modify
 from bdphpcprovider.settings_changeme import *
 
+Debug=False
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
