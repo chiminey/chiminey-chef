@@ -1,0 +1,29 @@
+{
+  "run_list": [
+    "recipe[cloudenabling]"
+  ],
+  "json_class": "Chef::Role",
+  "env_run_lists": {
+  },
+  "chef_type": "role",
+  "override_attributes": {
+  },
+
+"description": "",
+  "name": "cloudenabling-milestone3",
+  "default_attributes": {
+      "cloudenabling": {
+        "repo": "git@bitbucket.org:iiman/cloudenabling.git",
+        "branch": "master",
+        "apps": {
+        }
+      },
+      "postgresql": {
+        "dir": "/var/lib/pgsql/data",
+        "password": {
+          "postgres": "randompasswordkadsgjadsgj"
+         }
+      }
+   }
+}
+
