@@ -23,6 +23,9 @@
         "password": {
           "postgres": "randompasswordkadsgjadsgj"
          }
+      },
+      "yum": {
+	"epel_release": "6-8"
       }
    }
 }

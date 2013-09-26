@@ -29,6 +29,7 @@ include_recipe "cloudenabling::build-essential"
 include_recipe "cloudenabling::deps"
 include_recipe "cloudenabling::nginx"
 include_recipe "cloudenabling::postgresql"
+include_recipe "redis::install"
 
 # Sadly, only works for centos 6.x for the moment
 
@@ -203,6 +204,8 @@ deploy_revision "cloudenabling" do
         service nginx stop
         service nginx stop
         service nginx start
+        service redis stop
+        service redis start 
         stop celeryd 
         start celeryd
         stop celerybeat 
