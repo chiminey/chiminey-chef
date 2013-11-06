@@ -1,7 +1,7 @@
 #Generated from Chef, do not modify
 from bdphpcprovider.settings_changeme import *
 
-Debug=False
+DEBUG=False
 
 DATABASES = {
     'default': {
@@ -14,6 +14,7 @@ DATABASES = {
     }
 }
 
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -25,19 +26,57 @@ LOGGING = {
 
     'handlers': {
         'file': {
-            'level':'DEBUG',
+            'level':'INFO',
             'class': 'logging.FileHandler',
             'filename': '/var/log/cloudenabling/bdphpcprovider.log',
             'formatter': 'timestamped'
         },
     },
-
     'loggers': {
         'bdphpcprovider.smartconnectorscheduler': {
             'handlers': ['file'],
             'level': 'INFO',
             },
-        },
+        'bdphpcprovider.reliabilityframework': {
+                'handlers': ['file'],
+                'level': 'INFO',
+            },
+        'bdphpcprovider.simpleui': {
+                'handlers': ['file'],
+                'level': 'INFO',
+            },
+        'bdphpcprovider.core': {
+                'handlers': ['file'],
+                'level': 'INFO',
+            },
+        }
+}
+
+
+CELERY_DEFAULT_QUEUE = 'default'
+CELERY_QUEUES = {
+   "hightasks": {
+       "binding_key": "high",
+       "exchange": "default",
+   },
+   "default": {
+       "binding_key": "default",
+       "exchange": "default",
+   }
+}
+CELERY_DEFAULT_EXCHANGE = "default"
+CELERY_DEFAULT_EXCHANGE_TYPE = "direct"
+CELERY_DEFAULT_ROUTING_KEY = "default"
+
+CELERY_ROUTES = {
+  "smartconnectorscheduler.context_message": {
+   "queue": "hightasks",
+   "routing_key": "high",
+},
+"smartconnectorscheduler.delete": {
+   "queue": "hightasks",
+   "routing_key": "high",
+},
 }
 
 #BROKER_TRANSPORT = 'django'
