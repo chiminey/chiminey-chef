@@ -102,10 +102,17 @@ cookbook_file "/opt/cloudenabling/shared/buildout.cfg" do
   group "bdphpc"
 end
 
-
 cookbook_file "/etc/init/celeryd.conf" do
   action :create_if_missing
   source "celeryd.conf"
+  mode 0755
+  owner "root"
+  group "root"
+end
+
+cookbook_file "/etc/init/celerycam.conf" do
+  action :create_if_missing
+  source "celerycam.conf"
   mode 0755
   owner "root"
   group "root"
@@ -127,7 +134,7 @@ cookbook_file "/etc/init/uwsgi.conf" do
   group "bdphpc"
 end
 
-app_symlinks = {}
+app_symlinks = {cam}
 
 # if you delete /opt/cloudenabling to regenerate, don't forget to remove
 # /var/chef-solo/cache/deploy-revisions/cloudenabling otherwise the respo clone wont work.
@@ -210,7 +217,8 @@ deploy_revision "cloudenabling" do
         start celeryd
         stop celerybeat 
         start celerybeat 
-
+	stop celerycam
+	start celerycam
       EOH
     end
   end
