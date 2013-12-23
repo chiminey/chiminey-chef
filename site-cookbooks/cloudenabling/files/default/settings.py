@@ -20,65 +20,59 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'timestamped': {
-            'format': '%(asctime)s-%(filename)s-%(lineno)s-%(levelname)s: %(message)s'
+            'format': ' [%(asctime)s: %(levelname)s/%(processName)s] %(message)s'
+           # 'format': '%(asctime)s-%(filename)s-%(lineno)s-%(levelname)s: %(message)s'
         },
+    'celery': {
+            'format': ' [%(asctime)s: %(levelname)s/%(task_name)s] %(message)s'
+    }
+
     },
 
     'handlers': {
         'file': {
-            'level':'INFO',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': '/var/log/cloudenabling/bdphpcprovider.log',
-            'formatter': 'timestamped'
+            'formatter': 'timestamped',
+            'maxBytes': 1024 * 1024 * 100,  # 100 mb
+            'backupCount': 2
+        },
+        'celeryd': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/var/log/cloudenabling/celery/celeryd.log',
+            'formatter': 'celery',
+            'maxBytes': 1024 * 1024 * 100,  # 100 mb
+            'backupCount': 2
         },
     },
     'loggers': {
         'bdphpcprovider.smartconnectorscheduler': {
+            'level': 'WARN',
             'handlers': ['file'],
-            'level': 'INFO',
             },
         'bdphpcprovider.reliabilityframework': {
+            'level': 'WARN',
                 'handlers': ['file'],
-                'level': 'INFO',
             },
         'bdphpcprovider.simpleui': {
+            'level': 'WARN',
                 'handlers': ['file'],
-                'level': 'INFO',
             },
         'bdphpcprovider.core': {
+            'level': 'WARN',
                 'handlers': ['file'],
-                'level': 'INFO',
             },
-        }
+        'bdphpcprovider.smartconnectorscheduler.tasks': {
+            'level': 'WARN',
+            'handlers': ['celeryd'],
+            },
+        'celery.task': {
+                'level': 'ERROR',
+                'handlers': ['celeryd'],
+            },
+        'django.db.backends': {
+                'level': 'WARN',
+                'handlers': ['file'],
+        },
 }
-
-
-CELERY_DEFAULT_QUEUE = 'default'
-CELERY_QUEUES = {
-   "hightasks": {
-       "binding_key": "high",
-       "exchange": "default",
-   },
-   "default": {
-       "binding_key": "default",
-       "exchange": "default",
-   }
 }
-CELERY_DEFAULT_EXCHANGE = "default"
-CELERY_DEFAULT_EXCHANGE_TYPE = "direct"
-CELERY_DEFAULT_ROUTING_KEY = "default"
-
-CELERY_ROUTES = {
-  "smartconnectorscheduler.context_message": {
-   "queue": "hightasks",
-   "routing_key": "high",
-},
-"smartconnectorscheduler.delete": {
-   "queue": "hightasks",
-   "routing_key": "high",
-},
-}
-
-#BROKER_TRANSPORT = 'django'
-BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
