@@ -217,8 +217,6 @@ deploy_revision "cloudenabling" do
         start celeryd
         stop celerybeat
         start celerybeat
-	stop celerycam
-	start celerycam
       EOH
     end
   end
