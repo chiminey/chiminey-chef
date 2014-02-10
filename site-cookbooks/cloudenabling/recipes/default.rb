@@ -1,7 +1,7 @@
 #
 # Cookbook Name:: cloudenabling
 # Recipe:: default
-# Copyright (C) 2012, RMIT University
+# Copyright (C) 2014, RMIT University
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to
@@ -83,7 +83,7 @@ end
 directory "/home/bdphpc/.python-eggs" do
   owner "bdphpc"
   group "bdphpc"
-  mode "0770"  
+  mode "0770"
   action :create
 end
 
@@ -110,13 +110,13 @@ cookbook_file "/etc/init/celeryd.conf" do
   group "root"
 end
 
-cookbook_file "/etc/init/celerycam.conf" do
-  action :create_if_missing
-  source "celerycam.conf"
-  mode 0755
-  owner "root"
-  group "root"
-end
+# cookbook_file "/etc/init/celerycam.conf" do
+#   action :create_if_missing
+#   source "celerycam.conf"
+#   mode 0755
+#   owner "root"
+#   group "root"
+# end
 
 cookbook_file "/etc/init/celerybeat.conf" do
   action :create_if_missing
@@ -134,10 +134,10 @@ cookbook_file "/etc/init/uwsgi.conf" do
   group "bdphpc"
 end
 
-app_symlinks = {cam}
+app_symlinks = {}
 
 # if you delete /opt/cloudenabling to regenerate, don't forget to remove
-# /var/chef-solo/cache/deploy-revisions/cloudenabling otherwise the respo clone wont work.
+# /var/chef-solo/cache/deploy-revisions/cloudenabling otherwise the repos clone wont work.
 
 # To access private repos, generate ssh key for bdphpc and upload to bitbucket
 deploy_revision "cloudenabling" do
@@ -145,7 +145,7 @@ deploy_revision "cloudenabling" do
   deploy_to "/opt/cloudenabling"
   repository node['cloudenabling']['repo']
   branch node['cloudenabling']['branch']
-  user "bdphpc" 
+  user "bdphpc"
   group "bdphpc"
   symlink_before_migrate(app_symlinks.merge({
       "log" => "log",
@@ -212,11 +212,11 @@ deploy_revision "cloudenabling" do
         service nginx stop
         service nginx start
         service redis stop
-        service redis start 
-        stop celeryd 
+        service redis start
+        stop celeryd
         start celeryd
-        stop celerybeat 
-        start celerybeat 
+        stop celerybeat
+        start celerybeat
 	stop celerycam
 	start celerycam
       EOH

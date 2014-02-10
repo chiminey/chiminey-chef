@@ -13,7 +13,7 @@
   "name": "cloudenabling-milestone3",
   "default_attributes": {
       "cloudenabling": {
-        "repo": "git@bitbucket.org:iiman/cloudenabling.git",
+        "repo": "https://USERNAME@bitbucket.org/iiman/cloudenabling.git",
         "branch": "master",
         "apps": {
         }
