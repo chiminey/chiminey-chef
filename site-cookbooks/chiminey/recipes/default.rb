@@ -182,7 +182,7 @@ deploy_revision "chiminey" do
         python setup.py clean
         find . -name '*.py[co]' -delete
         python bootstrap.py -c buildout-prod.cfg -v 1.7.0
-        bin/buildout -c buildout-prod.cfg install
+        bin/buildout -v -c buildout-prod.cfg install
         bin/django syncdb --noinput --migrate
         bin/django collectstatic -l --noinput
       EOH
