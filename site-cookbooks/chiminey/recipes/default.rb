@@ -150,7 +150,7 @@ deploy_revision "chiminey" do
   symlink_before_migrate(app_symlinks.merge({
       "log" => "log",
       "buildout.cfg" => "buildout-prod.cfg",
-      "settings.py" => "bdphpcprovider/settings.py"
+      "settings.py" => "chiminey/settings.py"
   }))
   purge_before_symlink([])
   create_dirs_before_symlink([])
