@@ -1,5 +1,5 @@
 {
-  "name": "cloudenabling-chefsolo-whateveryoulike",
+  "name": "chiminey-chefsolo-whateveryoulike",
   "chef_environment": "_default",
   "normal": {
     "tags": [
@@ -13,6 +13,6 @@
     }
   },
   "run_list": [
-    "role[cloudenabling]"
+    "role[chiminey]"
   ]
 }

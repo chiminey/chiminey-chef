@@ -1,5 +1,5 @@
 #Generated from Chef, do not modify
-from bdphpcprovider.settings_changeme import *
+from chiminey.settings_changeme import *
 
 DEBUG=False
 
@@ -32,37 +32,37 @@ LOGGING = {
     'handlers': {
         'file': {
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log/cloudenabling/bdphpcprovider.log',
+            'filename': '/var/log/chiminey/chiminey.log',
             'formatter': 'timestamped',
             'maxBytes': 1024 * 1024 * 100,  # 100 mb
             'backupCount': 2
         },
         'celeryd': {
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log/cloudenabling/celery/celeryd.log',
+            'filename': '/var/log/chiminey/celery/celeryd.log',
             'formatter': 'celery',
             'maxBytes': 1024 * 1024 * 100,  # 100 mb
             'backupCount': 2
         },
     },
     'loggers': {
-        'bdphpcprovider.smartconnectorscheduler': {
+        'chiminey.smartconnectorscheduler': {
             'level': 'WARN',
             'handlers': ['file'],
             },
-        'bdphpcprovider.reliabilityframework': {
+        'chiminey.reliabilityframework': {
             'level': 'WARN',
                 'handlers': ['file'],
             },
-        'bdphpcprovider.simpleui': {
+        'chiminey.simpleui': {
             'level': 'WARN',
                 'handlers': ['file'],
             },
-        'bdphpcprovider.core': {
+        'chiminey.core': {
             'level': 'WARN',
                 'handlers': ['file'],
             },
-        'bdphpcprovider.smartconnectorscheduler.tasks': {
+        'chiminey.smartconnectorscheduler.tasks': {
             'level': 'WARN',
             'handlers': ['celeryd'],
             },

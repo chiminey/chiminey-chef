@@ -1,6 +1,6 @@
 {
   "run_list": [
-    "recipe[cloudenabling]"
+    "recipe[chiminey]"
   ],
   "json_class": "Chef::Role",
   "env_run_lists": {
@@ -10,10 +10,10 @@
   },
 
 "description": "",
-  "name": "cloudenabling-milestone3",
+  "name": "chiminey-release",
   "default_attributes": {
-      "cloudenabling": {
-        "repo": "https://USERNAME@bitbucket.org/iiman/cloudenabling.git",
+      "chiminey": {
+        "repo": "https://github.com/chiminey/chiminey.git",
         "branch": "master",
         "apps": {
         }
@@ -21,7 +21,7 @@
       "postgresql": {
         "dir": "/var/lib/pgsql/data",
         "password": {
-          "postgres": "randompasswordkadsgjadsgj"
+          "postgres": "randompasswordkadsgjsdaddsgj"
          }
       },
       "yum": {

@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: cloudenabling
+# Cookbook Name:: chiminey
 # Recipe:: default
 # Copyright (C) 2014, RMIT University
 
@@ -25,10 +25,10 @@
 
 
 include_recipe "git"
-include_recipe "cloudenabling::build-essential"
-include_recipe "cloudenabling::deps"
-include_recipe "cloudenabling::nginx"
-include_recipe "cloudenabling::postgresql"
+include_recipe "chiminey::build-essential"
+include_recipe "chiminey::deps"
+include_recipe "chiminey::nginx"
+include_recipe "chiminey::postgresql"
 include_recipe "redis::install"
 
 # Sadly, only works for centos 6.x for the moment
@@ -48,20 +48,20 @@ user "bdphpc" do
 end
 
 app_dirs = [
-  "/opt/cloudenabling",
-  "/opt/cloudenabling/shared",
-  "/var/lib/cloudenabling",
-  "/var/log/cloudenabling",
-  "/var/log/cloudenabling/celery",
-  "/var/run/cloudenabling",
-  "/var/run/cloudenabling/celery",
-  "/var/cloudenabling",
-  "/var/cloudenabling/remotesys"
+  "/opt/chiminey",
+  "/opt/chiminey/shared",
+  "/var/lib/chiminey",
+  "/var/log/chiminey",
+  "/var/log/chiminey/celery",
+  "/var/run/chiminey",
+  "/var/run/chiminey/celery",
+  "/var/chiminey",
+  "/var/chiminey/remotesys"
 ]
 
 app_links = {
-  "/opt/cloudenabling/shared/data" => "/var/lib/cloudenabling",
-  "/opt/cloudenabling/shared/log" => "/var/log/cloudenabling"
+  "/opt/chiminey/shared/data" => "/var/lib/chiminey",
+  "/opt/chiminey/shared/log" => "/var/log/chiminey"
 }
 
 app_dirs.each do |dir|
@@ -88,14 +88,14 @@ directory "/home/bdphpc/.python-eggs" do
 end
 
 
-cookbook_file "/opt/cloudenabling/shared/settings.py" do
+cookbook_file "/opt/chiminey/shared/settings.py" do
   action :create_if_missing
   source "settings.py"
   owner "bdphpc"
   group "bdphpc"
 end
 
-cookbook_file "/opt/cloudenabling/shared/buildout.cfg" do
+cookbook_file "/opt/chiminey/shared/buildout.cfg" do
   action :create
   source "buildout.cfg"
   owner "bdphpc"
@@ -136,15 +136,15 @@ end
 
 app_symlinks = {}
 
-# if you delete /opt/cloudenabling to regenerate, don't forget to remove
-# /var/chef-solo/cache/deploy-revisions/cloudenabling otherwise the repos clone wont work.
+# if you delete /opt/chiminey to regenerate, don't forget to remove
+# /var/chef-solo/cache/deploy-revisions/chiminey otherwise the repos clone wont work.
 
 # To access private repos, generate ssh key for bdphpc and upload to bitbucket
-deploy_revision "cloudenabling" do
+deploy_revision "chiminey" do
   action :deploy
-  deploy_to "/opt/cloudenabling"
-  repository node['cloudenabling']['repo']
-  branch node['cloudenabling']['branch']
+  deploy_to "/opt/chiminey"
+  repository node['chiminey']['repo']
+  branch node['chiminey']['branch']
   user "bdphpc"
   group "bdphpc"
   symlink_before_migrate(app_symlinks.merge({
@@ -163,22 +163,22 @@ deploy_revision "cloudenabling" do
       environment ({'RELEASEDIR' => current_release})
     end
 
-    file "/opt/cloudenabling/shared/settings.py" do
+    file "/opt/chiminey/shared/settings.py" do
       user "bdphpc"
       group "bdphpc"
     end
 
-    file "/opt/cloudenabling/shared/buildout.cfg" do
+    file "/opt/chiminey/shared/buildout.cfg" do
       user "bdphpc"
       group "bdphpc"
     end
 
-    bash "cloudenabling_buildout_install" do
+    bash "chiminey_buildout_install" do
       user "bdphpc"
       cwd current_release
       code <<-EOH
         # this egg-cache directory never gets created - hopfully not a problem.
-        export PYTHON_EGG_CACHE=/opt/cloudenabling/shared/egg-cache
+        export PYTHON_EGG_CACHE=/opt/chiminey/shared/egg-cache
         python setup.py clean
         find . -name '*.py[co]' -delete
         python bootstrap.py -c buildout-prod.cfg -v 1.7.0
@@ -191,7 +191,7 @@ deploy_revision "cloudenabling" do
   before_restart do
     # latest versions of uwsgi retrieved from buildout do not support xml
     # so we have to to use earlier version FIXME: use different getting approach
-    cookbook_file "/opt/cloudenabling/current/bin/uwsgi" do
+    cookbook_file "/opt/chiminey/current/bin/uwsgi" do
        action :create
        mode 0755
        source "uwsgi-old"
@@ -204,7 +204,7 @@ deploy_revision "cloudenabling" do
     current_release = release_path
 
     bash "mytardis_foreman_install_and_restart" do
-      cwd "/opt/cloudenabling/current"
+      cwd "/opt/chiminey/current"
       code <<-EOH
         stop uwsgi
         start uwsgi

@@ -54,7 +54,7 @@ file "/etc/nginx/conf.d/default.conf" do
     action :delete
 end
 
-cookbook_file "/etc/nginx/conf.d/cloudenabling.conf" do
+cookbook_file "/etc/nginx/conf.d/chiminey.conf" do
   action :create
   source "nginx_site.conf"
   mode "644"
