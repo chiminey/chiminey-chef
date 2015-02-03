@@ -1,3 +1,4 @@
+name "chiminey"
 maintainer       "Ian Thomas"
 maintainer_email "ianedwardthomas@gmail.com"
 license          "All rights reserved"
